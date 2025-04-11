@@ -25,7 +25,13 @@ copy_font = pygame.font.SysFont("Press Start 2P Regular", 12)
 
 menu_options = ["PLAY", "OPTIONS", "CREDITS"]
 selected_index = 0
-current_screen = "menu"  # Nuevo estado de pantalla
+current_screen = "menu"
+
+# Variables para opciones de sonido
+music_muted = False
+sfx_muted = False
+options_menu = ["MUSIC: ON", "SFX: ON", "BACK"]
+options_index = 0
 
 def rainbow_color(phase):
     h = (phase % 360) / 360.0
@@ -66,20 +72,36 @@ while running:
                     selected_index = (selected_index + 1) % len(menu_options)
                 elif event.key == pygame.K_UP:
                     selected_index = (selected_index - 1) % len(menu_options)
-                    # select.play()
                 elif event.key == pygame.K_RETURN:
                     selected_option = menu_options[selected_index]
-                    print("Selected:", selected_option)
                     if selected_option == "CREDITS":
                         current_screen = "credits"
                     elif selected_option == "PLAY":
-                        print("Iniciar juego...")
+                        current_screen = "play"
                     elif selected_option == "OPTIONS":
-                        print("Mostrar opciones...")
-                    # enter.play()
+                        current_screen = "options"
 
             elif current_screen == "credits":
                 if event.key == pygame.K_ESCAPE:
+                    current_screen = "menu"
+
+            elif current_screen == "options":
+                if event.key == pygame.K_DOWN:
+                    options_index = (options_index + 1) % len(options_menu)
+                elif event.key == pygame.K_UP:
+                    options_index = (options_index - 1) % len(options_menu)
+                elif event.key == pygame.K_RETURN:
+                    if options_index == 0:
+                        music_muted = not music_muted
+                        options_menu[0] = "MUSIC: OFF" if music_muted else "MUSIC: ON"
+                        # pygame.mixer.music.set_volume(0 if music_muted else 1)
+                    elif options_index == 1:
+                        sfx_muted = not sfx_muted
+                        options_menu[1] = "SFX: OFF" if sfx_muted else "SFX: ON"
+                        # Aquí podrías mutear los sonidos tipo: select.set_volume(0)
+                    elif options_index == 2:
+                        current_screen = "menu"
+                elif event.key == pygame.K_ESCAPE:
                     current_screen = "menu"
 
     screen.fill(BLACK)
@@ -124,9 +146,18 @@ while running:
             text = score_font.render(line, True, WHITE)
             screen.blit(text, (WIDTH // 2 - text.get_width() // 2, 200 + i * 30))
 
+    elif current_screen == "options":
+        title = title_font.render("OPCIONES", True, WHITE)
+        screen.blit(title, (WIDTH // 2 - title.get_width() // 2, 100))
+
+        for i, option in enumerate(options_menu):
+            color = YELLOW if i == options_index else WHITE
+            text = menu_font.render(option, True, color)
+            screen.blit(text, (WIDTH // 2 - text.get_width() // 2, 200 + i * 60))
+
     elif current_screen == "play":
         screen.fill(BLACK)
-        
+
     pygame.display.flip()
     clock.tick(60)
 
