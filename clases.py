@@ -99,6 +99,7 @@ class Enemy:
             self.points = 10
             self.image = IMAGE_enemy3
 
+        self.image:[]
         self.can_shoot = False  # propiedad para determinar si el enemigo puede disparar
 
     def move(self, speed):
@@ -124,57 +125,55 @@ class Barrier(pygame.sprite.Sprite):
         self.image = self.original_image.copy()
         self.rect = self.image.get_rect(topleft=(x, y))
         self.mask = pygame.mask.from_surface(self.image)
-        self.health = 5  # Más puntos de vida para permitir destrucción gradual
+        self.health = 8 
         
     def impact(self, bullet):
-        """Crea daño visual preciso en el punto de impacto"""
-        # Obtener coordenadas relativas del impacto
+        #obtener las coords del impacto
         x_rel = bullet.rect.centerx - self.rect.x
         y_rel = bullet.rect.centery - self.rect.y
         
-        # Verificar que las coordenadas estén dentro de los límites
+        #verificar que las coordenadas estén dentro de los límites
         if 0 <= x_rel < self.image.get_width() and 0 <= y_rel < self.image.get_height():
-            # Tamaño del daño basado en el tipo de bala
-            damage_radius = 30 if bullet.is_enemy else 5
+            #Tamaño del daño basado en el tipo de bala
+            damage_radius = 25 if bullet.is_enemy else 5
             
-            # Crear un patrón de daño aleatorio pero realista
-            for i in range(damage_radius * 2):
+            #crear un patrón de daño aleatorio pero realista
+            for i in range(damage_radius * 3):
                 for j in range(damage_radius * 2):
                     damage_x = x_rel + i - damage_radius
                     damage_y = y_rel + j - damage_radius
                     
-                    # Verificar límites
+                    #verificar límites
                     if (0 <= damage_x < self.image.get_width() and 
                         0 <= damage_y < self.image.get_height()):
                         
                         # Distancia al centro del impacto
                         dist = ((damage_x - x_rel) ** 2 + (damage_y - y_rel) ** 2) ** 0.5
                         
-                        # Aplicar daño basado en la distancia al centro
+                        #daño basado en el cenrto
                         if dist < damage_radius and random.random() > (dist / damage_radius) * 0.6:
-                            # Hacer transparente el píxel (eliminar parte de la barrera)
+                            #eliminar parte de la barrera
                             self.image.set_at((int(damage_x), int(damage_y)), (0, 0, 0, 0))
             
             # Reducir salud y actualizar la máscara
             self.health -= 1
             self.mask = pygame.mask.from_surface(self.image)
             
-            # Verificar si queda muy poco de la barrera (menos del 25% de los píxeles originales)
             pixel_count = 0
             for x in range(self.image.get_width()):
                 for y in range(self.image.get_height()):
-                    if self.image.get_at((x, y))[3] > 0:  # Si el pixel tiene alfa > 0 (no es transparente)
+                    if self.image.get_at((x, y))[3] > 0:  
                         pixel_count += 1
             
-            # Devolver True si la barrera debe ser destruida (pocos píxeles o salud <= 0)
-            if pixel_count < 150 or self.health <= 0:  # Umbral arbitrario de píxeles
+
+            if pixel_count < 150 or self.health <= 0: 
                 return True
         return False
         
     def draw(self, surface):
         surface.blit(self.image, self.rect.topleft)
 
-# clase para crear estrellas en el fondo
+#clase para crear estrellas en el fondo
 class Star:
     def __init__(self):
         self.x = random.randint(0, WIDTH)

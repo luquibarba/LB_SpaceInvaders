@@ -7,21 +7,22 @@ from clases import *
 pygame.init()
 pygame.mixer.init()
 
-# dimensiones de la ventana del juego
+#dimensiones de la ventana del juego
 WIDTH, HEIGHT = 470, 680
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Invaders - Barba Edition")
 
-# cargamos los efectos de sonido del juego
+#cargamos los efectos de sonido del juego
 enter_sound = pygame.mixer.Sound('./assets/music/undertale-save.mp3')
 select_sound = pygame.mixer.Sound('./assets/music/undertale-select-sound.mp3')
 shoot_sound = pygame.mixer.Sound('./assets/music/shoot.mp3')  
 hit_sound = pygame.mixer.Sound('./assets/music/hit.mp3')
 hitp1_sound = pygame.mixer.Sound('./assets/music/hitp1.mp3')
 hitp2_sound = pygame.mixer.Sound('./assets/music/hitp2.mp3')
+music_sound = pygame.mixer.Sound('./assets/music/music.mp3')
 
 
-# definimos los colores basicos que usaremos
+#definimos los colores basicos que usaremos
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 YELLOW = (230, 230, 0)
@@ -69,7 +70,6 @@ stars = [Star() for _ in range(100)]
 color_phase = 0
 clock = pygame.time.Clock()
 running = True
-load_high_score()
 
 # inicializamos las variables del juego
 player = None
@@ -152,7 +152,7 @@ def show_game_over():
     screen.blit(instruction, (WIDTH // 2 - instruction.get_width() // 2, 400))
     
     pygame.display.flip()
-    
+
     # esperar a que se presione una tecla
     waiting = True
     while waiting:
@@ -173,7 +173,7 @@ def save_high_score():
     except:
         pass  # falla silenciosamente si no se puede guardar
 
-# funcion para cargar la puntuacion maxima
+#funcion para cargar la puntuacion maxima
 def load_high_score():
     """carga la puntuacion maxima desde el archibgo"""
     global high_score
@@ -186,6 +186,7 @@ def load_high_score():
 
 # bucle principal del juego
 while running:
+    load_high_score()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -193,10 +194,17 @@ while running:
         elif event.type == pygame.KEYDOWN:
             # navegacion del menu
             if current_screen == "menu":
+                level = 1
+                enemies = []
+                score = 0
                 if event.key == pygame.K_DOWN:
                     selected_index = (selected_index + 1) % len(menu_options)
                     if not sfx_muted:
                         select_sound.play()
+                if event.key == pygame.K_r:
+                    high_score = 0
+                    save_high_score()
+                    load_high_score()
                 elif event.key == pygame.K_w:
                     high_score == 0
                     high_score = 0
@@ -411,7 +419,7 @@ while running:
                 if max(e.rect.bottom for e in enemies) > player.rect.top:
                     lives = 0  # fin del juego si los enemigos llegan al jugador
 
-        # iniciar nuevo nivel si todos los enemigos son eliminados
+        #iniciar nuevo nivel si todos los enemigos son eliminados
         if not enemies:
             level += 1
             enemies = [Enemy(x * 50 + 50, y * 40 + 50, y) for y in range(3) for x in range(7)]
